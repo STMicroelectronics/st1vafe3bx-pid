@@ -2464,8 +2464,8 @@ typedef struct
   uint8_t vafe_only;
 } st1vafe3bx_priv_t;
 
-int32_t st1vafe3bx_enter_vafe_only(stmdev_ctx_t *ctx);
-int32_t st1vafe3bx_exit_vafe_only(stmdev_ctx_t *ctx);
+int32_t st1vafe3bx_enter_vafe_only(const stmdev_ctx_t *ctx);
+int32_t st1vafe3bx_exit_vafe_only(const stmdev_ctx_t *ctx);
 int32_t st1vafe3bx_ah_bio_active(const stmdev_ctx_t *ctx, uint8_t filter_on);
 
 typedef struct
@@ -2719,4 +2719,3 @@ int32_t st1vafe3bx_mlc_fifo_en_get(const stmdev_ctx_t *ctx, uint8_t *val);
 #endif
 
 #endif /* ST1VAFE3BX_REGS_H */
-

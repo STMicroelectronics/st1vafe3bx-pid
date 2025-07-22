@@ -517,19 +517,26 @@ int32_t st1vafe3bx_mode_set(const stmdev_ctx_t *ctx, const st1vafe3bx_md_t *val)
   ctrl5.fs = (uint8_t)val->fs;
 
   /* select high performance mode */
-  switch (val->odr & 0x30U)
+  if (val->odr == 0x00U)
   {
-    case 0x30U:
-    case 0x10U:
-      /* high performance mode */
-      ctrl3.hp_en = 1U;
-      break;
-    case 0x00U:
-    case 0x20U:
-    default:
-      /* low power mode */
-      ctrl3.hp_en = 0U;
-      break;
+    ctrl3.hp_en = 1U;
+  }
+  else
+  {
+    switch (val->odr & 0x30U)
+    {
+      case 0x30U:
+      case 0x10U:
+        /* high performance mode */
+        ctrl3.hp_en = 1U;
+        break;
+      case 0x00U:
+      case 0x20U:
+      default:
+        /* low power mode */
+        ctrl3.hp_en = 0U;
+        break;
+    }
   }
 
   /* set the bandwidth */
@@ -633,7 +640,7 @@ int32_t st1vafe3bx_mode_get(const stmdev_ctx_t *ctx, st1vafe3bx_md_t *val)
       val->odr = ST1VAFE3BX_25Hz_ULP;
       break;
     case 0x04:
-      val->odr = ST1VAFE3BX_6Hz_LP;
+      val->odr = (ctrl3.hp_en == 0x1U) ? ST1VAFE3BX_6Hz_HP : ST1VAFE3BX_6Hz_LP;
       break;
     case 0x05:
       val->odr = (ctrl3.hp_en == 0x1U) ? ST1VAFE3BX_12Hz5_HP : ST1VAFE3BX_12Hz5_LP;
@@ -723,8 +730,8 @@ int32_t st1vafe3bx_mode_get(const stmdev_ctx_t *ctx, st1vafe3bx_md_t *val)
   }
   else
   {
-    if (ctrl5.odr == ST1VAFE3BX_6Hz_LP || ctrl5.odr == ST1VAFE3BX_12Hz5_LP
-        || ctrl5.odr == ST1VAFE3BX_25Hz_LP)
+    if (val->odr == ST1VAFE3BX_6Hz_LP || val->odr == ST1VAFE3BX_12Hz5_LP
+        || val->odr == ST1VAFE3BX_25Hz_LP)
     {
       switch (ctrl5.bw)
       {
@@ -2457,7 +2464,7 @@ int32_t st1vafe3bx_ah_bio_config_get(const stmdev_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t st1vafe3bx_enter_vafe_only(stmdev_ctx_t *ctx)
+int32_t st1vafe3bx_enter_vafe_only(const stmdev_ctx_t *ctx)
 {
   st1vafe3bx_ah_bio_cfg2_t cfg2;
   int32_t ret;
@@ -2485,7 +2492,7 @@ int32_t st1vafe3bx_enter_vafe_only(stmdev_ctx_t *ctx)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t st1vafe3bx_exit_vafe_only(stmdev_ctx_t *ctx)
+int32_t st1vafe3bx_exit_vafe_only(const stmdev_ctx_t *ctx)
 {
   st1vafe3bx_ah_bio_cfg2_t cfg2;
   int32_t ret;
@@ -4445,4 +4452,3 @@ int32_t st1vafe3bx_mlc_fifo_en_get(const stmdev_ctx_t *ctx, uint8_t *val)
   * @}
   *
   */
-
