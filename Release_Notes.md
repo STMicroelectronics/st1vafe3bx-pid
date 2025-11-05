@@ -95,7 +95,7 @@ This directory contains the ST1VAFE3BX component drivers.
 
 </div>
 
-<input type="checkbox" id="collapse-section6" checked aria-hidden="true">
+<input type="checkbox" id="collapse-section6" aria-hidden="true">
 <label for="collapse-section6" aria-hidden="true">V2.3.0 / 07-Oct-2025</label>
 <div>
 
@@ -107,6 +107,18 @@ This directory contains the ST1VAFE3BX component drivers.
 - Update the 'st1vafe3bx_mode_set()' function
 - Fix High Performance mode selection
 - Adding CODE_OF_CONDUCT.md and SECURITY.md
+
+##
+
+</div>
+
+<input type="checkbox" id="collapse-section7" checked aria-hidden="true">
+<label for="collapse-section7" aria-hidden="true">V2.3.1 / 05-Nov-2025</label>
+<div>
+
+## Main changes
+
+- Fix ah_bio_active API
 
 ##
 
