@@ -143,119 +143,74 @@ int32_t st1vafe3bx_device_id_get(const stmdev_ctx_t *ctx, uint8_t *val)
 }
 
 /**
-  * @brief  Configures the bus operating mode.[get]
+  * @brief  Initialize the device with optimal settings.[set]
   *
   * @param  ctx   communication interface handler.(ptr)
-  * @param  val   configures the bus operating mode.(ptr)
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t st1vafe3bx_init_set(const stmdev_ctx_t *ctx, st1vafe3bx_init_t val)
+int32_t st1vafe3bx_init_set(const stmdev_ctx_t *ctx)
 {
   st1vafe3bx_ctrl1_t ctrl1;
   st1vafe3bx_ctrl4_t ctrl4;
-  st1vafe3bx_status_t status;
-  st1vafe3bx_ctrl3_t ctrl3;
-  st1vafe3bx_ah_bio_cfg2_t ah_bio_cfg2;
-  st1vafe3bx_ah_bio_cfg3_t ah_bio_cfg3;
+
   uint8_t cnt = 0;
   int32_t ret;
 
   ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_CTRL1, (uint8_t *)&ctrl1, 1);
   ret += st1vafe3bx_read_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
-  ret += st1vafe3bx_read_reg(ctx, ST1VAFE3BX_AH_BIO_CFG2,
-                             (uint8_t *)&ah_bio_cfg2, 1);
-  ret += st1vafe3bx_read_reg(ctx, ST1VAFE3BX_AH_BIO_CFG3,
-                             (uint8_t *)&ah_bio_cfg3, 1);
-  ret += st1vafe3bx_read_reg(ctx, ST1VAFE3BX_CTRL3, (uint8_t *)&ctrl3, 1);
 
   if (ret != 0)
   {
-    return ret;
+    goto exit;
   }
 
-  switch (val)
-  {
-    case ST1VAFE3BX_SENSOR_ONLY_ON:
-      /* no embedded funcs are used */
-      ctrl4.emb_func_en = PROPERTY_DISABLE;
-      ctrl4.bdu = PROPERTY_ENABLE;
-      ctrl1.if_add_inc = PROPERTY_ENABLE;
-      ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
-      ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL1, (uint8_t *)&ctrl1, 1);
-      break;
-    case ST1VAFE3BX_SENSOR_EMB_FUNC_ON:
-      /* complete configuration is used */
-      ctrl4.emb_func_en = PROPERTY_ENABLE;
-      ctrl4.bdu = PROPERTY_ENABLE;
-      ctrl1.if_add_inc = PROPERTY_ENABLE;
-      ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
-      ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL1, (uint8_t *)&ctrl1, 1);
-      break;
-    case ST1VAFE3BX_VAFE_ONLY_LP:
-    case ST1VAFE3BX_VAFE_ONLY_HP:
-      /*
-        * when the device is in the AH / vAFE only state, the embedded low power
-        * features are not available
-        */
-      ctrl4.bdu = PROPERTY_ENABLE;
-      ctrl1.if_add_inc = PROPERTY_ENABLE;
-      ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
-      ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL1, (uint8_t *)&ctrl1, 1);
+  ctrl4.bdu = PROPERTY_ENABLE;
+  ctrl1.if_add_inc = PROPERTY_ENABLE;
 
-      ah_bio_cfg2.ah_bio_en = PROPERTY_ENABLE;
-      ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_AH_BIO_CFG2,
-                                  (uint8_t *)&ah_bio_cfg2, 1);
+  ret = st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL1, (uint8_t *)&ctrl1, 1);
+  ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
 
-      ah_bio_cfg3.ah_bio_active = PROPERTY_ENABLE;
-      ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_AH_BIO_CFG3,
-                                  (uint8_t *)&ah_bio_cfg3, 1);
-
-      if (ctx->mdelay != NULL)
-      {
-        ctx->mdelay(10);
-      }
-
-      if (val == ST1VAFE3BX_VAFE_ONLY_HP)
-      {
-        ctrl3.hp_en = PROPERTY_ENABLE;
-      }
-      else
-      {
-        ctrl3.hp_en = PROPERTY_DISABLE;
-      }
-
-      ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL3, (uint8_t *)&ctrl3, 1);
-
-      ah_bio_cfg3.ah_bio_active = PROPERTY_DISABLE;
-      ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_AH_BIO_CFG3,
-                                  (uint8_t *)&ah_bio_cfg3, 1);
-
-      if (ctx->mdelay != NULL)
-      {
-        ctx->mdelay(10);
-      }
-      break;
-    default:
-      /* Sensor Only On by default */
-      ctrl4.emb_func_en = PROPERTY_DISABLE;
-      ctrl4.bdu = PROPERTY_ENABLE;
-      ctrl1.if_add_inc = PROPERTY_ENABLE;
-      ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
-      ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL1, (uint8_t *)&ctrl1, 1);
-      break;
-  }
-
+exit:
   return ret;
 }
 
 /**
- * @brief Perform device reboot (boot time: 25 ms)
- *
- * @param  ctx      read / write interface definitions
- * @retval          0: reboot has been performed, -1: error
- *
- */
+  * @brief Enables embedded functions
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  state    enables / disables embedded functions
+  * @retval          0: reboot has been performed, -1: error
+  *
+  */
+int32_t st1vafe3bx_embedded_state_set(const stmdev_ctx_t *ctx, uint8_t state)
+{
+  int32_t ret;
+  st1vafe3bx_ctrl4_t ctrl4;
+
+  ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
+
+  if (ret != 0)
+  {
+    goto exit;
+  }
+
+  ctrl4.emb_func_en = state;
+
+  ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
+
+
+exit:
+  return ret;
+}
+
+/**
+  * @brief Perform device reboot (boot time: 25 ms)
+  *
+  * @param  ctx      read / write interface definitions
+  * @retval          0: reboot has been performed, -1: error
+  *
+  */
 int32_t st1vafe3bx_reboot(const stmdev_ctx_t *ctx)
 {
   st1vafe3bx_ctrl4_t ctrl4;

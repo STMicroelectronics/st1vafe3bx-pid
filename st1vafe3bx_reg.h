@@ -2010,16 +2010,9 @@ float_t st1vafe3bx_from_lsb_to_mv(int16_t lsb);
 
 int32_t st1vafe3bx_device_id_get(const stmdev_ctx_t *ctx, uint8_t *val);
 
-typedef enum
-{
-  ST1VAFE3BX_SENSOR_ONLY_ON     = 0x00, /* Initialize the driver for sensor usage */
-  ST1VAFE3BX_SENSOR_EMB_FUNC_ON = 0x03, /* Initialize the driver for sensor and/or
-                                           embedded functions usage (it takes 10ms) */
-  ST1VAFE3BX_VAFE_ONLY_LP       = 0x04, /* Enable sensor in vAFE only mode - low performance */
-  ST1VAFE3BX_VAFE_ONLY_HP       = 0x05, /* Enable sensor in vAFE only mode - high performance */
-} st1vafe3bx_init_t;
-int32_t st1vafe3bx_init_set(const stmdev_ctx_t *ctx, st1vafe3bx_init_t val);
+int32_t st1vafe3bx_init_set(const stmdev_ctx_t *ctx);
 
+int32_t st1vafe3bx_embedded_state_set(const stmdev_ctx_t *ctx, uint8_t state);
 int32_t st1vafe3bx_reboot(const stmdev_ctx_t *ctx);
 int32_t st1vafe3bx_sw_reset(const stmdev_ctx_t *ctx);
 
