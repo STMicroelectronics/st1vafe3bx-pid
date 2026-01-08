@@ -2108,7 +2108,6 @@ typedef enum
 typedef struct
 {
   /* if the hp_en bit is set the AH / vAFE data are in 14-bit format */
-  uint8_t hp_en                        : 1;
   st1vafe3bx_fs_t fs                 : 2;
   st1vafe3bx_odr_t odr;
   st1vafe3bx_bw_t bw;

@@ -550,13 +550,15 @@ int32_t st1vafe3bx_mode_set(const stmdev_ctx_t *ctx, const st1vafe3bx_md_t *val)
     return ret;
   }
 
-  if (ctrl3.hp_en != val->hp_en)
+  uint8_t hp_en = (val->odr & 0x10) >> 4;
+
+  if (ctrl3.hp_en != hp_en)
   {
     hp_en_change = 1U;
   }
 
   /* Set the power mode */
-  ctrl3.hp_en = val->hp_en;
+  ctrl3.hp_en = hp_en;
 
   if (hp_en_change == 1U  &&  ctrl5.odr != 0x00)
   {
@@ -784,8 +786,6 @@ int32_t st1vafe3bx_mode_get(const stmdev_ctx_t *ctx, st1vafe3bx_md_t *val)
   ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_CTRL5, (uint8_t *)&ctrl5, 1);
   ret += st1vafe3bx_read_reg(ctx, ST1VAFE3BX_CTRL3, (uint8_t *)&ctrl3, 1);
   ret += st1vafe3bx_read_reg(ctx, ST1VAFE3BX_AH_BIO_CFG2, (uint8_t *)&ah_bio_cfg2, 1);
-
-  val->hp_en = ctrl3.hp_en;
 
   if (ret != 0)
   {
