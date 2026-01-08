@@ -159,7 +159,7 @@ int32_t st1vafe3bx_init_set(const stmdev_ctx_t *ctx, st1vafe3bx_init_t val)
   st1vafe3bx_ah_bio_cfg2_t ah_bio_cfg2;
   st1vafe3bx_ah_bio_cfg3_t ah_bio_cfg3;
   uint8_t cnt = 0;
-  uint8_t ret;
+  int32_t ret;
 
   ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_CTRL1, (uint8_t *)&ctrl1, 1);
   ret += st1vafe3bx_read_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
@@ -176,72 +176,6 @@ int32_t st1vafe3bx_init_set(const stmdev_ctx_t *ctx, st1vafe3bx_init_t val)
 
   switch (val)
   {
-    case ST1VAFE3BX_BOOT:
-      ctrl4.boot = PROPERTY_ENABLE;
-      ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
-      if (ret != 0)
-      {
-        break;
-      }
-
-      do
-      {
-        ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
-        if (ret != 0)
-        {
-          break;
-        }
-
-        /* boot procedure ended correctly */
-        if (ctrl4.boot == 0U)
-        {
-          break;
-        }
-
-        if (ctx->mdelay != NULL)
-        {
-          ctx->mdelay(25); /* 25 ms of boot time */
-        }
-      } while (cnt++ < 5U);
-
-      if (cnt >= 5U)
-      {
-        ret = -1;  /* boot procedure failed */
-      }
-      break;
-    case ST1VAFE3BX_RESET:
-      ctrl1.sw_reset = PROPERTY_ENABLE;
-      ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL1, (uint8_t *)&ctrl1, 1);
-      if (ret != 0)
-      {
-        break;
-      }
-
-      do
-      {
-        ret = st1vafe3bx_status_get(ctx, &status);
-        if (ret != 0)
-        {
-          break;
-        }
-
-        /* sw-reset procedure ended correctly */
-        if (status.sw_reset == 0U)
-        {
-          break;
-        }
-
-        if (ctx->mdelay != NULL)
-        {
-          ctx->mdelay(1); /* should be 50 us */
-        }
-      } while (cnt++ < 5U);
-
-      if (cnt >= 5U)
-      {
-        ret = -1;  /* sw-reset procedure failed */
-      }
-      break;
     case ST1VAFE3BX_SENSOR_ONLY_ON:
       /* no embedded funcs are used */
       ctrl4.emb_func_en = PROPERTY_DISABLE;
@@ -303,11 +237,122 @@ int32_t st1vafe3bx_init_set(const stmdev_ctx_t *ctx, st1vafe3bx_init_t val)
       }
       break;
     default:
-      ctrl1.sw_reset = PROPERTY_ENABLE;
+      /* Sensor Only On by default */
+      ctrl4.emb_func_en = PROPERTY_DISABLE;
+      ctrl4.bdu = PROPERTY_ENABLE;
+      ctrl1.if_add_inc = PROPERTY_ENABLE;
+      ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
       ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL1, (uint8_t *)&ctrl1, 1);
       break;
   }
 
+  return ret;
+}
+
+/**
+ * @brief Perform device reboot (boot time: 25 ms)
+ *
+ * @param  ctx      read / write interface definitions
+ * @retval          0: reboot has been performed, -1: error
+ *
+ */
+int32_t st1vafe3bx_reboot(const stmdev_ctx_t *ctx)
+{
+  st1vafe3bx_ctrl4_t ctrl4;
+  uint8_t cnt = 0;
+  int32_t ret;
+
+  ret += st1vafe3bx_read_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
+
+  if (ret != 0)
+  {
+    goto exit;
+  }
+
+  ctrl4.boot = PROPERTY_ENABLE;
+  ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
+  if (ret != 0)
+  {
+    goto exit;
+  }
+
+  do
+  {
+    ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
+    if (ret != 0)
+    {
+      break;
+    }
+
+    /* boot procedure ended correctly */
+    if (ctrl4.boot == 0U)
+    {
+      break;
+    }
+
+    if (ctx->mdelay != NULL)
+    {
+      ctx->mdelay(25); /* 25 ms of boot time */
+    }
+  } while (cnt++ < 5U);
+
+  if (cnt >= 5U)
+  {
+    ret = -1;  /* boot procedure failed */
+  }
+
+exit:
+  return ret;
+}
+
+/**
+  * @brief Software reset: resets configuration registers.
+  *
+  * @param  ctx      read / write interface definitions
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t st1vafe3bx_sw_reset(const stmdev_ctx_t *ctx)
+{
+  st1vafe3bx_ctrl1_t ctrl1 = {0};
+  st1vafe3bx_status_t status;
+  int32_t ret;
+  uint8_t cnt = 0;
+
+  ctrl1.sw_reset = PROPERTY_ENABLE;
+
+  ret = st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL1, (uint8_t *)&ctrl1, 1);
+  if (ret != 0)
+  {
+    goto exit;
+  }
+
+  do
+  {
+    ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_CTRL1, (uint8_t *)&ctrl1, 1);
+    if (ret != 0)
+    {
+      break;
+    }
+
+    /* sw-reset procedure ended correctly */
+    if (ctrl1.sw_reset == 0U)
+    {
+      break;
+    }
+
+    if (ctx->mdelay != NULL)
+    {
+      ctx->mdelay(1); /* should be 50 us */
+    }
+  } while (cnt++ < 5U);
+
+  if (cnt >= 5U || ret != 0)
+  {
+    ret = -1;  /* sw-reset procedure failed */
+  }
+
+exit:
   return ret;
 }
 
