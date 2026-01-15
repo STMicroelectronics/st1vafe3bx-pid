@@ -112,13 +112,27 @@ This directory contains the ST1VAFE3BX component drivers.
 
 </div>
 
-<input type="checkbox" id="collapse-section7" checked aria-hidden="true">
+<input type="checkbox" id="collapse-section7" aria-hidden="true">
 <label for="collapse-section7" aria-hidden="true">V2.3.1 / 05-Nov-2025</label>
 <div>
 
 ## Main changes
 
 - Fix ah_bio_active API
+
+##
+
+</div>
+
+<input type="checkbox" id="collapse-section8" checked aria-hidden="true">
+<label for="collapse-section8" aria-hidden="true">V2.4.0 / 15-Jan-2026</label>
+<div>
+
+## Main changes
+
+- Remove hp_en from md_t struct
+- Add embedded_state_set API and remove init_t struct
+- Add reboot and sw_reset APIs, extracted from init_set
 
 ##
 
