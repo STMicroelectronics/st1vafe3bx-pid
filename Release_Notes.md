@@ -30,66 +30,26 @@ This directory contains the ST1VAFE3BX component drivers.
 # Update history
 
 ::: {.collapse}
-
-<input type="checkbox" id="collapse-section1" aria-hidden="true">
-<label for="collapse-section1" aria-hidden="true">V1.0.0 / 20-Sept-2024</label>
+<input type="checkbox" id="collapse-section8" checked aria-hidden="true">
+<label for="collapse-section8" aria-hidden="true">V2.4.0 / 15-Jan-2026</label>
 <div>
 
 ## Main changes
 
-### First release
-
-- First official release [ref. DS v1.0]
+- Remove hp_en from md_t struct
+- Add embedded_state_set API and remove init_t struct
+- Add reboot and sw_reset APIs, extracted from init_set
 
 ##
 
 </div>
-
-<input type="checkbox" id="collapse-section2" aria-hidden="true">
-<label for="collapse-section2" aria-hidden="true">V2.0.0 / 08-Nov-2024</label>
+<input type="checkbox" id="collapse-section7" aria-hidden="true">
+<label for="collapse-section7" aria-hidden="true">V2.3.1 / 05-Nov-2025</label>
 <div>
 
 ## Main changes
 
-- Align driver to DS Rev2
-
-##
-
-</div>
-
-<input type="checkbox" id="collapse-section3" aria-hidden="true">
-<label for="collapse-section3" aria-hidden="true">V2.1.0 / 07-Apr-2025</label>
-<div>
-
-## Main changes
-
-- fix drdy event clearing
-- Make ctx a private structure
-
-##
-
-</div>
-
-<input type="checkbox" id="collapse-section4" aria-hidden="true">
-<label for="collapse-section4" aria-hidden="true">V2.1.1 / 16-Apr-2025</label>
-<div>
-
-## Main changes
-
-- Fix fifo_mode_set
-
-##
-
-</div>
-
-<input type="checkbox" id="collapse-section5" aria-hidden="true">
-<label for="collapse-section5" aria-hidden="true">V2.2.0 / 07-Jul-2025</label>
-<div>
-
-## Main changes
-
-- Fix driver formatting options
-- Added pointer to private data in stmdev_ctx_t
+- Fix ah_bio_active API
 
 ##
 
@@ -112,31 +72,71 @@ This directory contains the ST1VAFE3BX component drivers.
 
 </div>
 
-<input type="checkbox" id="collapse-section7" aria-hidden="true">
-<label for="collapse-section7" aria-hidden="true">V2.3.1 / 05-Nov-2025</label>
+<input type="checkbox" id="collapse-section5" aria-hidden="true">
+<label for="collapse-section5" aria-hidden="true">V2.2.0 / 07-Jul-2025</label>
 <div>
 
 ## Main changes
 
-- Fix ah_bio_active API
+- Fix driver formatting options
+- Added pointer to private data in stmdev_ctx_t
 
 ##
 
 </div>
 
-<input type="checkbox" id="collapse-section8" checked aria-hidden="true">
-<label for="collapse-section8" aria-hidden="true">V2.4.0 / 15-Jan-2026</label>
+<input type="checkbox" id="collapse-section4" aria-hidden="true">
+<label for="collapse-section4" aria-hidden="true">V2.1.1 / 16-Apr-2025</label>
 <div>
 
 ## Main changes
 
-- Remove hp_en from md_t struct
-- Add embedded_state_set API and remove init_t struct
-- Add reboot and sw_reset APIs, extracted from init_set
+- Fix fifo_mode_set
 
 ##
 
 </div>
+
+<input type="checkbox" id="collapse-section3" aria-hidden="true">
+<label for="collapse-section3" aria-hidden="true">V2.1.0 / 07-Apr-2025</label>
+<div>
+
+## Main changes
+
+- fix drdy event clearing
+- Make ctx a private structure
+
+##
+
+</div>
+
+<input type="checkbox" id="collapse-section2" aria-hidden="true">
+<label for="collapse-section2" aria-hidden="true">V2.0.0 / 08-Nov-2024</label>
+<div>
+
+## Main changes
+
+- Align driver to DS Rev2
+
+##
+
+</div>
+
+<input type="checkbox" id="collapse-section1" aria-hidden="true">
+<label for="collapse-section1" aria-hidden="true">V1.0.0 / 20-Sept-2024</label>
+<div>
+
+## Main changes
+
+### First release
+
+- First official release [ref. DS v1.0]
+
+##
+
+</div>
+
+
 :::
 
 
