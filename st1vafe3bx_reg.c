@@ -154,7 +154,6 @@ int32_t st1vafe3bx_init_set(const stmdev_ctx_t *ctx)
   st1vafe3bx_ctrl1_t ctrl1;
   st1vafe3bx_ctrl4_t ctrl4;
 
-  uint8_t cnt = 0;
   int32_t ret;
 
   ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_CTRL1, (uint8_t *)&ctrl1, 1);
@@ -217,7 +216,7 @@ int32_t st1vafe3bx_reboot(const stmdev_ctx_t *ctx)
   uint8_t cnt = 0;
   int32_t ret;
 
-  ret += st1vafe3bx_read_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
+  ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
 
   if (ret != 0)
   {
@@ -270,7 +269,6 @@ exit:
 int32_t st1vafe3bx_sw_reset(const stmdev_ctx_t *ctx)
 {
   st1vafe3bx_ctrl1_t ctrl1 = {0};
-  st1vafe3bx_status_t status;
   int32_t ret;
   uint8_t cnt = 0;
 
