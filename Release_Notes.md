@@ -30,7 +30,20 @@ This directory contains the ST1VAFE3BX component drivers.
 # Update history
 
 ::: {.collapse}
-<input type="checkbox" id="collapse-section8" checked aria-hidden="true">
+<input type="checkbox" id="collapse-section9" checked aria-hidden="true">
+<label for="collapse-section9" aria-hidden="true">V2.4.1 / 05-Mar-2026</label>
+<div>
+
+## Main changes
+
+- Applied code review
+- Re-order update history with most updated on top
+
+##
+
+</div>
+
+<input type="checkbox" id="collapse-section8" aria-hidden="true">
 <label for="collapse-section8" aria-hidden="true">V2.4.0 / 15-Jan-2026</label>
 <div>
 
@@ -43,6 +56,7 @@ This directory contains the ST1VAFE3BX component drivers.
 ##
 
 </div>
+
 <input type="checkbox" id="collapse-section7" aria-hidden="true">
 <label for="collapse-section7" aria-hidden="true">V2.3.1 / 05-Nov-2025</label>
 <div>
