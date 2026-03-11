@@ -510,11 +510,11 @@ int32_t st1vafe3bx_data_ready_mode_get(const stmdev_ctx_t *ctx,
 
   switch ((ctrl1.drdy_pulsed))
   {
-    case ST1VAFE3BX_DRDY_LATCHED:
+    case 0x00:
       *val = ST1VAFE3BX_DRDY_LATCHED;
       break;
 
-    case ST1VAFE3BX_DRDY_PULSED:
+    case 0x01:
       *val = ST1VAFE3BX_DRDY_PULSED;
       break;
 
@@ -1176,19 +1176,19 @@ int32_t st1vafe3bx_self_test_sign_set(const stmdev_ctx_t *ctx,
 
   switch (val)
   {
-    case ST1VAFE3BX_XL_ST_POSITIVE:
+    case 0x01:
       ctrl3.st_sign_x = 1;
       ctrl3.st_sign_y = 1;
       wkup_dur.st_sign_z = 0;
       break;
 
-    case ST1VAFE3BX_XL_ST_NEGATIVE:
+    case 0x02:
       ctrl3.st_sign_x = 0;
       ctrl3.st_sign_y = 0;
       wkup_dur.st_sign_z = 1;
       break;
 
-    case ST1VAFE3BX_XL_ST_DISABLE:
+    case 0x00:
     default:
       ret = -1;
       break;
@@ -1309,19 +1309,19 @@ int32_t st1vafe3bx_i3c_configure_set(const stmdev_ctx_t *ctx,
 
   switch (val->bus_act_sel)
   {
-    case ST1VAFE3BX_I3C_BUS_AVAIL_TIME_20US:
+    case 0x00:
       val->bus_act_sel = ST1VAFE3BX_I3C_BUS_AVAIL_TIME_20US;
       break;
 
-    case ST1VAFE3BX_I3C_BUS_AVAIL_TIME_50US:
+    case 0x01:
       val->bus_act_sel = ST1VAFE3BX_I3C_BUS_AVAIL_TIME_50US;
       break;
 
-    case ST1VAFE3BX_I3C_BUS_AVAIL_TIME_1MS:
+    case 0x02:
       val->bus_act_sel = ST1VAFE3BX_I3C_BUS_AVAIL_TIME_1MS;
       break;
 
-    case ST1VAFE3BX_I3C_BUS_AVAIL_TIME_25MS:
+    case 0x03:
     default:
       val->bus_act_sel = ST1VAFE3BX_I3C_BUS_AVAIL_TIME_25MS;
       break;
