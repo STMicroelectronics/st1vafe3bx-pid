@@ -2001,13 +2001,6 @@ int32_t st1vafe3bx_write_reg(const stmdev_ctx_t *ctx, uint8_t reg,
                              uint8_t *data,
                              uint16_t len);
 
-float_t st1vafe3bx_from_fs2g_to_mg(int16_t lsb);
-float_t st1vafe3bx_from_fs4g_to_mg(int16_t lsb);
-float_t st1vafe3bx_from_fs8g_to_mg(int16_t lsb);
-float_t st1vafe3bx_from_fs16g_to_mg(int16_t lsb);
-float_t st1vafe3bx_from_lsb_to_celsius(int16_t lsb);
-float_t st1vafe3bx_from_lsb_to_mv(int16_t lsb);
-
 int32_t st1vafe3bx_device_id_get(const stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t st1vafe3bx_init_set(const stmdev_ctx_t *ctx);
@@ -2439,7 +2432,7 @@ typedef struct
     ST1VAFE3BX_1GOhm                        = 0x3,
   } zin;
 
-  enum
+  enum st1vafe3bx_gain
   {
     ST1VAFE3BX_GAIN_2                       = 0x0,
     ST1VAFE3BX_GAIN_4                       = 0x1,
@@ -2455,11 +2448,24 @@ int32_t st1vafe3bx_ah_bio_config_get(const stmdev_ctx_t *ctx,
 typedef struct
 {
   uint8_t vafe_only;
+  enum st1vafe3bx_gain gain;
 } st1vafe3bx_priv_t;
 
 int32_t st1vafe3bx_enter_vafe_only(const stmdev_ctx_t *ctx);
 int32_t st1vafe3bx_exit_vafe_only(const stmdev_ctx_t *ctx);
 int32_t st1vafe3bx_ah_bio_active(const stmdev_ctx_t *ctx, uint8_t filter_on);
+
+float_t st1vafe3bx_from_fs2g_to_mg(int16_t lsb);
+float_t st1vafe3bx_from_fs4g_to_mg(int16_t lsb);
+float_t st1vafe3bx_from_fs8g_to_mg(int16_t lsb);
+float_t st1vafe3bx_from_fs16g_to_mg(int16_t lsb);
+
+float_t st1vafe3bx_from_gain2_to_mv(int16_t lsb);
+float_t st1vafe3bx_from_gain4_to_mv(int16_t lsb);
+float_t st1vafe3bx_from_gain8_to_mv(int16_t lsb);
+float_t st1vafe3bx_from_gain16_to_mv(int16_t lsb);
+
+float_t st1vafe3bx_from_lsb_to_mv(int16_t lsb, enum st1vafe3bx_gain gain);
 
 typedef struct
 {

@@ -109,9 +109,54 @@ float_t st1vafe3bx_from_fs16g_to_mg(int16_t lsb)
   return (float_t)lsb * 0.488f;
 }
 
-float_t st1vafe3bx_from_lsb_to_mv(int16_t lsb)
+float_t st1vafe3bx_from_gain2_to_mv(int16_t lsb)
+{
+  return ((float_t)lsb) / 164.0f;
+}
+
+float_t st1vafe3bx_from_gain4_to_mv(int16_t lsb)
+{
+  return ((float_t)lsb) / 328.0f;
+}
+
+float_t st1vafe3bx_from_gain8_to_mv(int16_t lsb)
+{
+  return ((float_t)lsb) / 655.0f;
+}
+
+float_t st1vafe3bx_from_gain16_to_mv(int16_t lsb)
 {
   return ((float_t)lsb) / 1311.0f;
+}
+
+float_t st1vafe3bx_from_lsb_to_mv(int16_t lsb, enum st1vafe3bx_gain gain)
+{
+  float mV;
+
+  switch (gain)
+  {
+    case ST1VAFE3BX_GAIN_2:
+      mV = st1vafe3bx_from_gain2_to_mv(lsb);
+      break;
+
+    case ST1VAFE3BX_GAIN_4:
+      mV = st1vafe3bx_from_gain4_to_mv(lsb);
+      break;
+
+    case ST1VAFE3BX_GAIN_8:
+      mV = st1vafe3bx_from_gain8_to_mv(lsb);
+      break;
+
+    case ST1VAFE3BX_GAIN_16:
+      mV = st1vafe3bx_from_gain16_to_mv(lsb);
+      break;
+
+    default:
+      mV = 0.0f;
+      break;
+  }
+
+  return mV;
 }
 
 /**
@@ -1130,7 +1175,8 @@ int32_t st1vafe3bx_ah_bio_data_get(const stmdev_ctx_t *ctx,
     data->raw = (int16_t)buff[1];
     data->raw = (data->raw * 256U) + (int16_t)buff[0];
 
-    data->mv = st1vafe3bx_from_lsb_to_mv(data->raw);
+    data->mv = st1vafe3bx_from_lsb_to_mv(data->raw,
+                                         ((st1vafe3bx_priv_t *)(ctx->priv_data))->gain);
   }
   else
   {
@@ -1144,7 +1190,8 @@ int32_t st1vafe3bx_ah_bio_data_get(const stmdev_ctx_t *ctx,
     data->raw = (int16_t)buff[2];
     data->raw = (data->raw * 256U) + (int16_t)buff[1];
 
-    data->mv = st1vafe3bx_from_lsb_to_mv(data->raw);
+    data->mv = st1vafe3bx_from_lsb_to_mv(data->raw,
+                                         ((st1vafe3bx_priv_t *)(ctx->priv_data))->gain);
   }
 
   return ret;
@@ -2460,6 +2507,11 @@ int32_t st1vafe3bx_fifo_data_get(const stmdev_ctx_t *ctx,
   uint8_t fifo_raw[6];
   int32_t ret, i;
 
+  if (ctx->priv_data == NULL)
+  {
+    return -1;
+  }
+
   ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_FIFO_DATA_OUT_TAG,
                             (uint8_t *)&fifo_tag, 1);
   if (ret != 0)
@@ -2538,7 +2590,8 @@ int32_t st1vafe3bx_fifo_data_get(const stmdev_ctx_t *ctx,
       }
 
       data->ah_bio.raw = (int16_t)fifo_raw[0] + (int16_t)fifo_raw[1] * 256U;
-      data->ah_bio.mv = st1vafe3bx_from_lsb_to_mv(data->ah_bio.raw);
+      data->ah_bio.mv = st1vafe3bx_from_lsb_to_mv(data->ah_bio.raw,
+                                                  ((st1vafe3bx_priv_t *)(ctx->priv_data))->gain);
       break;
     case ST1VAFE3BX_XL_ONLY:
     case ST1VAFE3BX_XL_AND_AH_VAFE1_TAG:
@@ -2586,7 +2639,8 @@ int32_t st1vafe3bx_fifo_data_get(const stmdev_ctx_t *ctx,
         data->ah_bio.raw = (int16_t)fifo_raw[4] / 16U;
         data->ah_bio.raw = (data->ah_bio.raw +
                             ((int16_t)fifo_raw[5] * 16U)) * 16U;
-        data->ah_bio.mv = st1vafe3bx_from_lsb_to_mv(data->ah_bio.raw);
+        data->ah_bio.mv = st1vafe3bx_from_lsb_to_mv(data->ah_bio.raw,
+                                                    ((st1vafe3bx_priv_t *)(ctx->priv_data))->gain);
       }
       else
       {
@@ -2646,6 +2700,11 @@ int32_t st1vafe3bx_ah_bio_config_set(const stmdev_ctx_t *ctx,
   st1vafe3bx_ah_bio_cfg3_t cfg3;
   int32_t ret;
 
+  if (ctx->priv_data == NULL)
+  {
+    return -1;
+  }
+
   ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_AH_BIO_CFG1, (uint8_t *)&cfg1, 1);
   ret += st1vafe3bx_read_reg(ctx, ST1VAFE3BX_AH_BIO_CFG2, (uint8_t *)&cfg2, 1);
   ret += st1vafe3bx_read_reg(ctx, ST1VAFE3BX_AH_BIO_CFG3, (uint8_t *)&cfg3, 1);
@@ -2692,6 +2751,7 @@ int32_t st1vafe3bx_ah_bio_config_set(const stmdev_ctx_t *ctx,
         cfg2.ah_bio_gain = 0x0U;
         break;
     }
+    ((st1vafe3bx_priv_t *)(ctx->priv_data))->gain = (enum st1vafe3bx_gain)cfg2.ah_bio_gain;
 
     switch (val.zin)
     {
@@ -2735,6 +2795,11 @@ int32_t st1vafe3bx_ah_bio_config_get(const stmdev_ctx_t *ctx,
   st1vafe3bx_ah_bio_cfg2_t cfg2;
   st1vafe3bx_ah_bio_cfg3_t cfg3;
   int32_t ret;
+
+  if (ctx->priv_data == NULL)
+  {
+    return -1;
+  }
 
   ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_AH_BIO_CFG1, (uint8_t *)&cfg1, 1);
   ret += st1vafe3bx_read_reg(ctx, ST1VAFE3BX_AH_BIO_CFG2, (uint8_t *)&cfg2, 1);
@@ -2803,6 +2868,7 @@ int32_t st1vafe3bx_ah_bio_config_get(const stmdev_ctx_t *ctx,
       val->gain = ST1VAFE3BX_GAIN_2;
       break;
   }
+  ((st1vafe3bx_priv_t *)(ctx->priv_data))->gain = val->gain;
 
   return ret;
 }
