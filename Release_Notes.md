@@ -30,7 +30,20 @@ This directory contains the ST1VAFE3BX component drivers.
 # Update history
 
 ::: {.collapse}
-<input type="checkbox" id="collapse-section9" checked aria-hidden="true">
+<input type="checkbox" id="collapse-section10" checked aria-hidden="true">
+<label for="collapse-section10" aria-hidden="true">V2.4.2 / 18-Mar-2026</label>
+<div>
+
+## Main changes
+
+- Fixed st1vafe3bx_from_lsb_to_mv() API
+- Change switch cases to use hex values
+
+##
+
+</div>
+
+<input type="checkbox" id="collapse-section9" aria-hidden="true">
 <label for="collapse-section9" aria-hidden="true">V2.4.1 / 05-Mar-2026</label>
 <div>
 

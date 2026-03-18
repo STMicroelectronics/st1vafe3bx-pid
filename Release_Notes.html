@@ -8,66 +8,95 @@
   <style>
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
-    span.underline{text-decoration: underline;}
-    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
   <link rel="stylesheet" href="_htmresc/mini-st_2020.css" />
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
   <link rel="icon" type="image/x-icon" href="_htmresc/favicon.png" />
 </head>
 <body>
 <div class="row">
 <div class="col-sm-12 col-lg-4">
 <center>
-<h1 id="release-notes-for-st1vafe3bx-component-driver">Release Notes for ST1VAFE3BX Component Driver</h1>
+<h1 id="release-notes-for-st1vafe3bx-component-driver">Release Notes for
+ST1VAFE3BX Component Driver</h1>
 <p>Copyright © 2024 STMicroelectronics<br />
 </p>
-<a href="https://www.st.com" class="logo"><img src="_htmresc/st_logo_2020.png" alt="ST logo" /></a>
+<a href="https://www.st.com" class="logo"><img
+src="_htmresc/st_logo_2020.png" alt="ST logo" /></a>
 </center>
 <h1 id="license">License</h1>
-<p>This software component is licensed by ST under BSD 3-Clause license, the “License”. You may not use this component except in compliance with the License. You may obtain a copy of the License at:</p>
-<p><a href="https://opensource.org/licenses/BSD-3-Clause">BSD 3-Clause license</a></p>
+<p>This software component is licensed by ST under BSD 3-Clause license,
+the “License”. You may not use this component except in compliance with
+the License. You may obtain a copy of the License at:</p>
+<p><a href="https://opensource.org/licenses/BSD-3-Clause">BSD 3-Clause
+license</a></p>
 <h1 id="purpose">Purpose</h1>
 <p>This directory contains the ST1VAFE3BX component drivers.</p>
 </div>
 <section id="update-history" class="col-sm-12 col-lg-8">
 <h1>Update history</h1>
 <div class="collapse">
-<input type="checkbox" id="collapse-section9" checked aria-hidden="true"> <label for="collapse-section9" aria-hidden="true">V2.4.1 / 05-Mar-2026</label>
+<input type="checkbox" id="collapse-section10" checked aria-hidden="true">
+<label for="collapse-section10" aria-hidden="true">V2.4.2 /
+18-Mar-2026</label>
 <div>
 <h2 id="main-changes">Main changes</h2>
+<ul>
+<li>Fixed st1vafe3bx_from_lsb_to_mv() API</li>
+<li>Change switch cases to use hex values</li>
+</ul>
+<h2 id="section"></h2>
+</div>
+<input type="checkbox" id="collapse-section9" aria-hidden="true">
+<label for="collapse-section9" aria-hidden="true">V2.4.1 /
+05-Mar-2026</label>
+<div>
+<h2 id="main-changes-1">Main changes</h2>
 <ul>
 <li>Applied code review</li>
 <li>Re-order update history with most updated on top</li>
 </ul>
-<h2 id="section"></h2>
+<h2 id="section-1"></h2>
 </div>
-<input type="checkbox" id="collapse-section8" aria-hidden="true"> <label for="collapse-section8" aria-hidden="true">V2.4.0 / 15-Jan-2026</label>
+<input type="checkbox" id="collapse-section8" aria-hidden="true">
+<label for="collapse-section8" aria-hidden="true">V2.4.0 /
+15-Jan-2026</label>
 <div>
-<h2 id="main-changes-1">Main changes</h2>
+<h2 id="main-changes-2">Main changes</h2>
 <ul>
 <li>Remove hp_en from md_t struct</li>
 <li>Add embedded_state_set API and remove init_t struct</li>
 <li>Add reboot and sw_reset APIs, extracted from init_set</li>
 </ul>
-<h2 id="section-1"></h2>
+<h2 id="section-2"></h2>
 </div>
-<input type="checkbox" id="collapse-section7" aria-hidden="true"> <label for="collapse-section7" aria-hidden="true">V2.3.1 / 05-Nov-2025</label>
+<input type="checkbox" id="collapse-section7" aria-hidden="true">
+<label for="collapse-section7" aria-hidden="true">V2.3.1 /
+05-Nov-2025</label>
 <div>
-<h2 id="main-changes-2">Main changes</h2>
+<h2 id="main-changes-3">Main changes</h2>
 <ul>
 <li>Fix ah_bio_active API</li>
 </ul>
-<h2 id="section-2"></h2>
+<h2 id="section-3"></h2>
 </div>
-<input type="checkbox" id="collapse-section6" aria-hidden="true"> <label for="collapse-section6" aria-hidden="true">V2.3.0 / 07-Oct-2025</label>
+<input type="checkbox" id="collapse-section6" aria-hidden="true">
+<label for="collapse-section6" aria-hidden="true">V2.3.0 /
+07-Oct-2025</label>
 <div>
-<h2 id="main-changes-3">Main changes</h2>
+<h2 id="main-changes-4">Main changes</h2>
 <ul>
 <li>Added checks before writes and membank setting</li>
 <li>Changed a wrong write into a read in wakeup_config_get</li>
@@ -76,50 +105,60 @@
 <li>Fix High Performance mode selection</li>
 <li>Adding CODE_OF_CONDUCT.md and SECURITY.md</li>
 </ul>
-<h2 id="section-3"></h2>
+<h2 id="section-4"></h2>
 </div>
-<input type="checkbox" id="collapse-section5" aria-hidden="true"> <label for="collapse-section5" aria-hidden="true">V2.2.0 / 07-Jul-2025</label>
+<input type="checkbox" id="collapse-section5" aria-hidden="true">
+<label for="collapse-section5" aria-hidden="true">V2.2.0 /
+07-Jul-2025</label>
 <div>
-<h2 id="main-changes-4">Main changes</h2>
+<h2 id="main-changes-5">Main changes</h2>
 <ul>
 <li>Fix driver formatting options</li>
 <li>Added pointer to private data in stmdev_ctx_t</li>
 </ul>
-<h2 id="section-4"></h2>
+<h2 id="section-5"></h2>
 </div>
-<input type="checkbox" id="collapse-section4" aria-hidden="true"> <label for="collapse-section4" aria-hidden="true">V2.1.1 / 16-Apr-2025</label>
+<input type="checkbox" id="collapse-section4" aria-hidden="true">
+<label for="collapse-section4" aria-hidden="true">V2.1.1 /
+16-Apr-2025</label>
 <div>
-<h2 id="main-changes-5">Main changes</h2>
+<h2 id="main-changes-6">Main changes</h2>
 <ul>
 <li>Fix fifo_mode_set</li>
 </ul>
-<h2 id="section-5"></h2>
+<h2 id="section-6"></h2>
 </div>
-<input type="checkbox" id="collapse-section3" aria-hidden="true"> <label for="collapse-section3" aria-hidden="true">V2.1.0 / 07-Apr-2025</label>
+<input type="checkbox" id="collapse-section3" aria-hidden="true">
+<label for="collapse-section3" aria-hidden="true">V2.1.0 /
+07-Apr-2025</label>
 <div>
-<h2 id="main-changes-6">Main changes</h2>
+<h2 id="main-changes-7">Main changes</h2>
 <ul>
 <li>fix drdy event clearing</li>
 <li>Make ctx a private structure</li>
 </ul>
-<h2 id="section-6"></h2>
+<h2 id="section-7"></h2>
 </div>
-<input type="checkbox" id="collapse-section2" aria-hidden="true"> <label for="collapse-section2" aria-hidden="true">V2.0.0 / 08-Nov-2024</label>
+<input type="checkbox" id="collapse-section2" aria-hidden="true">
+<label for="collapse-section2" aria-hidden="true">V2.0.0 /
+08-Nov-2024</label>
 <div>
-<h2 id="main-changes-7">Main changes</h2>
+<h2 id="main-changes-8">Main changes</h2>
 <ul>
 <li>Align driver to DS Rev2</li>
 </ul>
-<h2 id="section-7"></h2>
+<h2 id="section-8"></h2>
 </div>
-<input type="checkbox" id="collapse-section1" aria-hidden="true"> <label for="collapse-section1" aria-hidden="true">V1.0.0 / 20-Sept-2024</label>
+<input type="checkbox" id="collapse-section1" aria-hidden="true">
+<label for="collapse-section1" aria-hidden="true">V1.0.0 /
+20-Sept-2024</label>
 <div>
-<h2 id="main-changes-8">Main changes</h2>
+<h2 id="main-changes-9">Main changes</h2>
 <h3 id="first-release">First release</h3>
 <ul>
 <li>First official release [ref. DS v1.0]</li>
 </ul>
-<h2 id="section-8"></h2>
+<h2 id="section-9"></h2>
 </div>
 </div>
 </section>
@@ -127,7 +166,8 @@
 <footer class="sticky">
 <div class="columns">
 <div class="column" style="width:95%;">
-<p>For complete documentation on ST1VAFE3BX, visit: <a href="https://www.st.com/en/mems-and-sensors/st1vafe3bx.html">ST1VAFE3BX</a></p>
+<p>For complete documentation on ST1VAFE3BX, visit: <a
+href="https://www.st.com/en/mems-and-sensors/st1vafe3bx.html">ST1VAFE3BX</a></p>
 </div><div class="column" style="width:5%;">
 <p><abbr title="Based on template cx566953 version 2.0">Info</abbr></p>
 </div>
