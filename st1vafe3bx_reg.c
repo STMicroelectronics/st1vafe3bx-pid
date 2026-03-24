@@ -2555,10 +2555,18 @@ int32_t st1vafe3bx_fifo_data_get(const stmdev_ctx_t *ctx,
         return ret;
       }
 
+      /*    fifo_raw[0]   fifo_raw[1]   fifo_raw[2]   fifo_raw[3]  fifo_raw[4]   fifo_raw[5]
+       * +-------------+-------------+-------------+-------------+-------------+-------------+
+       * | X0_76543210 | Y0_76543210 | Z0_76543210 | X1_76543210 | Y1_76543210 | Z1_76543210 |
+       * +-------------+-------------+-------------+-------------+-------------+-------------+
+       *  MSB       LSB MSB       LSB MSB       LSB MSB       LSB MSB       LSB MSB       LSB
+       *
+       *  8bit data (7654_3210) remapped to 16bit by <<8 or *256U (0x00 concatenated)
+       */
       for (i = 0; i < 3; i++)
       {
-        data->xl[0].raw[i] = (int16_t)fifo_raw[i] * 256U;
-        data->xl[1].raw[i] = (int16_t)fifo_raw[3 + i] * 256U;
+        data->xl[0].raw[i] = (int16_t)fifo_raw[i] * 256U;     /* PREV sample */
+        data->xl[1].raw[i] = (int16_t)fifo_raw[3 + i] * 256U; /* CURR sample */
       }
       break;
     case ST1VAFE3BX_STEP_COUNTER_TAG:
@@ -2587,6 +2595,14 @@ int32_t st1vafe3bx_fifo_data_get(const stmdev_ctx_t *ctx,
         return ret;
       }
 
+      /*    fifo_raw[0]   fifo_raw[1]   fifo_raw[2]   fifo_raw[3]  fifo_raw[4]   fifo_raw[5]
+       * +-------------+-------------+-------------+-------------+-------------+-------------+
+       * | V_76543210  | V_FEDCBA98  |             |             |             |             |
+       * +-------------+-------------+-------------+-------------+-------------+-------------+
+       *  MSB       LSB MSB       LSB MSB       LSB MSB       LSB MSB       LSB MSB       LSB
+       *
+       *  16bit data (FEDC_BA98_7654_3210)
+       */
       data->ah_bio.raw = (int16_t)fifo_raw[0] + (int16_t)fifo_raw[1] * 256U;
       data->ah_bio.mv = st1vafe3bx_from_lsb_to_mv(data->ah_bio.raw,
                                                   ((st1vafe3bx_priv_t *)(ctx->priv_data))->gain);
@@ -2606,45 +2622,41 @@ int32_t st1vafe3bx_fifo_data_get(const stmdev_ctx_t *ctx,
        */
       if (fmd->xl_only == 0x0U)
       {
-        /*
-         * data packaging in FIFO when XL and vAFE available:
-         *                 ------------- -------------
-         *                |    LSB0     | LSN1 | MSN0 |
-         *                 ------------- -------------
-         *                |    MSB1     |    LSB2     |
-         *                 ------------- -------------
-         *                | LSN3 | MSN2 |    MSB3     |
-         *                 ------------- -------------
+        /*    fifo_raw[0]   fifo_raw[1]   fifo_raw[2]   fifo_raw[3]  fifo_raw[4]   fifo_raw[5]
+         *  +-------------+-------------+-------------+-------------+-------------+-------------+
+         *  | X_76543210  |Y_3210 X_BA98| Y_BA987654  | Z_76543210  |V_3210 Z_BA98| V_BA987654  |
+         *  +-------------+-------------+-------------+-------------+-------------+-------------+
+         *   MSB       LSB MSB       LSB MSB       LSB MSB       LSB MSB       LSB MSB       LSB
          *
-         *  ------------- ------------- ------------- -------------
-         * |      X      |      Y      |      Z      |   vAFE      |
-         *  ------------- ------------- ------------- -------------
-         * | MSN0 | LSB0 | MSB1 | LSN1 | MSN2 | LSB2 | MSB3 | LSN3 |
-         *  ------ ------ ------ ------ ------ ------ ------ ------
+         *   12bit data (BA98_7654_3210) remapped to 16bit by <<4 or *16U (0x0 LSB concatenated)
          */
-        data->xl[0].raw[0] = (int16_t)fifo_raw[0];
-        data->xl[0].raw[0] = (data->xl[0].raw[0] +
-                              ((int16_t)fifo_raw[1] * 256U)) * 16U;
+        data->xl[0].raw[0] = ((int16_t)fifo_raw[0] +
+                              ((int16_t)(fifo_raw[1] & 0x0F) * 256U)) * 16U;
 
-        data->xl[0].raw[1] = (int16_t)fifo_raw[1] / 16U;
-        data->xl[0].raw[1] = (data->xl[0].raw[1] +
+        data->xl[0].raw[1] = ((int16_t)fifo_raw[1] / 16U +
                               (int16_t)fifo_raw[2] * 16U) * 16U;
 
-        data->xl[0].raw[2] = (int16_t)fifo_raw[3];
-        data->xl[0].raw[2] = (data->xl[0].raw[2] +
-                              ((int16_t)fifo_raw[4] * 256U)) * 16U;
+        data->xl[0].raw[2] = ((int16_t)fifo_raw[3] +
+                              ((int16_t)(fifo_raw[4] & 0x0F) * 256U)) * 16U;
 
-        data->ah_bio.raw = (int16_t)fifo_raw[4] / 16U;
-        data->ah_bio.raw = (data->ah_bio.raw +
+        data->ah_bio.raw = ((int16_t)fifo_raw[4] / 16U +
                             ((int16_t)fifo_raw[5] * 16U)) * 16U;
         data->ah_bio.mv = st1vafe3bx_from_lsb_to_mv(data->ah_bio.raw,
                                                     ((st1vafe3bx_priv_t *)(ctx->priv_data))->gain);
       }
       else
       {
+        /*    fifo_raw[0]   fifo_raw[1]   fifo_raw[2]   fifo_raw[3]  fifo_raw[4]   fifo_raw[5]
+         * +-------------+-------------+-------------+-------------+-------------+-------------+
+         * | X_76543210  | X_FEDCBA98  | Y_76543210  | Y_FEDCBA98  | Z_76543210  | Z_FEDCBA98  |
+         * +-------------+-------------+-------------+-------------+-------------+-------------+
+         *  MSB       LSB MSB       LSB MSB       LSB MSB       LSB MSB       LSB MSB       LSB
+         *
+         *  16bit data (FEDC_BA98_7654_3210)
+         */
         data->xl[0].raw[0] = (int16_t)fifo_raw[0] + (int16_t)fifo_raw[1] * 256U;
-        data->xl[0].raw[1] = (int16_t)fifo_raw[1] + (int16_t)fifo_raw[3] * 256U;
-        data->xl[0].raw[2] = (int16_t)fifo_raw[2] + (int16_t)fifo_raw[5] * 256U;
+        data->xl[0].raw[1] = (int16_t)fifo_raw[2] + (int16_t)fifo_raw[3] * 256U;
+        data->xl[0].raw[2] = (int16_t)fifo_raw[4] + (int16_t)fifo_raw[5] * 256U;
       }
       break;
     default:
