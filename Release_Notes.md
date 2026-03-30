@@ -30,7 +30,20 @@ This directory contains the ST1VAFE3BX component drivers.
 # Update history
 
 ::: {.collapse}
-<input type="checkbox" id="collapse-section10" checked aria-hidden="true">
+<input type="checkbox" id="collapse-section11" checked aria-hidden="true">
+<label for="collapse-section11" aria-hidden="true">V2.4.3 / 30-Mar-2026</label>
+<div>
+
+## Main changes
+
+- Fix FIFO data reading
+- Add variable initialization in all APIs
+
+##
+
+</div>
+
+<input type="checkbox" id="collapse-section10" aria-hidden="true">
 <label for="collapse-section10" aria-hidden="true">V2.4.2 / 18-Mar-2026</label>
 <div>
 
