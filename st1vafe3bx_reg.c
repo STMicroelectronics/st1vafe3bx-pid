@@ -591,7 +591,7 @@ int32_t st1vafe3bx_mode_set(const stmdev_ctx_t *ctx, const st1vafe3bx_md_t *val)
     return ret;
   }
 
-  uint8_t hp_en = (val->odr & 0x10) >> 4;
+  uint8_t hp_en = ((uint8_t)val->odr & 0x10u) >> 4;
 
   if (ctrl3.hp_en != hp_en)
   {
@@ -601,7 +601,7 @@ int32_t st1vafe3bx_mode_set(const stmdev_ctx_t *ctx, const st1vafe3bx_md_t *val)
   /* Set the power mode */
   ctrl3.hp_en = hp_en;
 
-  if (hp_en_change == 1U  &&  ctrl5.odr != 0x00)
+  if (hp_en_change == 1U  &&  ctrl5.odr != 0x00U)
   {
     /* Power down to allow HP_EN change (see: ST1VAFE3BX datasheet) */
     uint32_t timeout = (ctrl5.odr == 0x01U) ? 625U   /*     1.6 Hz */
@@ -627,7 +627,7 @@ int32_t st1vafe3bx_mode_set(const stmdev_ctx_t *ctx, const st1vafe3bx_md_t *val)
   ctrl5.fs  = (uint8_t)val->fs;
 
   /* Set the bandwidth */
-  if (ctx->priv_data && ((st1vafe3bx_priv_t *)(ctx->priv_data))->vafe_only == 1)
+  if ((ctx->priv_data != NULL) && ((st1vafe3bx_priv_t *)(ctx->priv_data))->vafe_only == 1U)
   {
     switch (val->odr)
     {
@@ -1051,7 +1051,7 @@ int32_t st1vafe3bx_all_sources_get(const stmdev_ctx_t *ctx,
 
   val->drdy = status.drdy;
 
-  if (ret == 0 && status.int_global == 0x1U)
+  if (status.int_global == 0x1U)
   {
     st1vafe3bx_wake_up_src_t wu_src;
     st1vafe3bx_tap_src_t tap_src;
@@ -1121,8 +1121,7 @@ int32_t st1vafe3bx_xl_data_get(const stmdev_ctx_t *ctx,
   j = 0U;
   for (i = 0U; i < 3U; i++)
   {
-    data->raw[i] = (int16_t)buff[j + 1U];
-    data->raw[i] = (data->raw[i] * 256U) + (int16_t) buff[j];
+    data->raw[i] = (int16_t)((uint16_t)buff[j] | ((uint16_t)buff[j + 1U] << 8));
     j += 2U;
     switch (md->fs)
     {
@@ -1161,8 +1160,12 @@ int32_t st1vafe3bx_ah_bio_data_get(const stmdev_ctx_t *ctx,
   uint8_t buff[3] = {0};
   int32_t ret = 0;
 
-  if (ctx->priv_data &&
-      ((st1vafe3bx_priv_t *)(ctx->priv_data))->vafe_only == 1)
+  if (ctx->priv_data == NULL)
+  {
+    return -1;
+  }
+
+  if (((st1vafe3bx_priv_t *)(ctx->priv_data))->vafe_only == 1U)
   {
     ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_OUT_AH_BIO_L, buff, 2);
     if (ret != 0)
@@ -1170,8 +1173,7 @@ int32_t st1vafe3bx_ah_bio_data_get(const stmdev_ctx_t *ctx,
       return ret;
     }
 
-    data->raw = (int16_t)buff[1];
-    data->raw = (data->raw * 256U) + (int16_t)buff[0];
+    data->raw = (int16_t)((uint16_t)buff[0] | ((uint16_t)buff[1] << 8));
 
     data->mv = st1vafe3bx_from_lsb_to_mv(data->raw,
                                          ((st1vafe3bx_priv_t *)(ctx->priv_data))->gain);
@@ -1179,7 +1181,7 @@ int32_t st1vafe3bx_ah_bio_data_get(const stmdev_ctx_t *ctx,
   else
   {
     /* Read and discard also OUT_Z_H reg to clear drdy */
-    ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_OUT_AH_BIO_L - 1, buff, 3);
+    ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_OUT_AH_BIO_L - 1u, buff, 3);
     if (ret != 0)
     {
       return ret;
@@ -1221,19 +1223,19 @@ int32_t st1vafe3bx_self_test_sign_set(const stmdev_ctx_t *ctx,
 
   switch (val)
   {
-    case 0x01:
+    case ST1VAFE3BX_XL_ST_POSITIVE:
       ctrl3.st_sign_x = 1;
       ctrl3.st_sign_y = 1;
       wkup_dur.st_sign_z = 0;
       break;
 
-    case 0x02:
+    case ST1VAFE3BX_XL_ST_NEGATIVE:
       ctrl3.st_sign_x = 0;
       ctrl3.st_sign_y = 0;
       wkup_dur.st_sign_z = 1;
       break;
 
-    case 0x00:
+    case ST1VAFE3BX_XL_ST_DISABLE:
     default:
       ret = -1;
       break;
@@ -1352,7 +1354,7 @@ int32_t st1vafe3bx_i3c_configure_set(const stmdev_ctx_t *ctx,
   val->drstdaa_en = i3c_cfg.dis_drstdaa;
   val->asf_on = i3c_cfg.asf_on;
 
-  switch (val->bus_act_sel)
+  switch (i3c_cfg.bus_act_sel)
   {
     case 0x00:
       val->bus_act_sel = ST1VAFE3BX_I3C_BUS_AVAIL_TIME_20US;
@@ -1520,7 +1522,7 @@ int32_t st1vafe3bx_ln_pg_write(const stmdev_ctx_t *ctx, uint16_t address,
     lsb++;
 
     /* Check if page wrap */
-    if (((lsb & 0xFFU) == 0x00U) && (ret == 0))
+    if ((lsb & 0xFFU) == 0x00U)
     {
       msb++;
       ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_PAGE_SEL,
@@ -1640,7 +1642,7 @@ int32_t st1vafe3bx_ln_pg_read(const stmdev_ctx_t *ctx, uint16_t address,
     lsb++;
 
     /* Check if page wrap */
-    if (((lsb & 0xFFU) == 0x00U) && (ret == 0))
+    if ((lsb & 0xFFU) == 0x00U)
     {
       msb++;
       ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_PAGE_SEL,
@@ -2521,7 +2523,7 @@ int32_t st1vafe3bx_fifo_data_get(const stmdev_ctx_t *ctx,
 
   switch (fifo_tag.tag_sensor)
   {
-    case ST1VAFE3BX_TIMESTAMP_CFG_CHG_TAG:
+    case (uint8_t)ST1VAFE3BX_TIMESTAMP_CFG_CHG_TAG:
       ret = st1vafe3bx_fifo_out_raw_get(ctx, fifo_raw);
 
       if (ret != 0)
@@ -2543,7 +2545,7 @@ int32_t st1vafe3bx_fifo_data_get(const stmdev_ctx_t *ctx,
       data->cfg_chg.timestamp = (data->cfg_chg.timestamp * 256U) +  fifo_raw[3];
       data->cfg_chg.timestamp = (data->cfg_chg.timestamp * 256U) +  fifo_raw[2];
       break;
-    case ST1VAFE3BX_XL_ONLY_2X_TAG:
+    case (uint8_t)ST1VAFE3BX_XL_ONLY_2X_TAG:
       /*
        * Accelerometer only data (2x depth mode), a FIFO sample consists
        * of 2 x 8-bits 3-axis XL at ODR/2
@@ -2565,11 +2567,11 @@ int32_t st1vafe3bx_fifo_data_get(const stmdev_ctx_t *ctx,
        */
       for (i = 0; i < 3; i++)
       {
-        data->xl[0].raw[i] = (int16_t)fifo_raw[i] * 256U;     /* PREV sample */
-        data->xl[1].raw[i] = (int16_t)fifo_raw[3 + i] * 256U; /* CURR sample */
+        data->xl[0].raw[i] = (int16_t)((uint16_t)fifo_raw[i] << 8);     /* PREV sample */
+        data->xl[1].raw[i] = (int16_t)((uint16_t)fifo_raw[3 + i] << 8); /* CURR sample */
       }
       break;
-    case ST1VAFE3BX_STEP_COUNTER_TAG:
+    case (uint8_t)ST1VAFE3BX_STEP_COUNTER_TAG:
       /* step counted + timestamp */
       ret = st1vafe3bx_fifo_out_raw_get(ctx, fifo_raw);
 
@@ -2586,7 +2588,7 @@ int32_t st1vafe3bx_fifo_data_get(const stmdev_ctx_t *ctx,
       data->pedo.timestamp = (data->pedo.timestamp * 256U) +  fifo_raw[3];
       data->pedo.timestamp = (data->pedo.timestamp * 256U) +  fifo_raw[2];
       break;
-    case ST1VAFE3BX_AH_VAFE_ONLY_TAG:
+    case (uint8_t)ST1VAFE3BX_AH_VAFE_ONLY_TAG:
       /* vAFE data (16 bit) if vafe_only mode is enabled */
       ret = st1vafe3bx_fifo_out_raw_get(ctx, fifo_raw);
 
@@ -2603,12 +2605,12 @@ int32_t st1vafe3bx_fifo_data_get(const stmdev_ctx_t *ctx,
        *
        *  16bit data (FEDC_BA98_7654_3210)
        */
-      data->ah_bio.raw = (int16_t)fifo_raw[0] + (int16_t)fifo_raw[1] * 256U;
+      data->ah_bio.raw = (int16_t)((uint16_t)fifo_raw[0] | ((uint16_t)fifo_raw[1] << 8));
       data->ah_bio.mv = st1vafe3bx_from_lsb_to_mv(data->ah_bio.raw,
                                                   ((st1vafe3bx_priv_t *)(ctx->priv_data))->gain);
       break;
-    case ST1VAFE3BX_XL_ONLY:
-    case ST1VAFE3BX_XL_AND_AH_VAFE1_TAG:
+    case (uint8_t)ST1VAFE3BX_XL_ONLY:
+    case (uint8_t)ST1VAFE3BX_XL_AND_AH_VAFE1_TAG:
       ret = st1vafe3bx_fifo_out_raw_get(ctx, fifo_raw);
 
       if (ret != 0)
@@ -2630,17 +2632,25 @@ int32_t st1vafe3bx_fifo_data_get(const stmdev_ctx_t *ctx,
          *
          *   12bit data (BA98_7654_3210) remapped to 16bit by <<4 or *16U (0x0 LSB concatenated)
          */
-        data->xl[0].raw[0] = ((int16_t)fifo_raw[0] +
-                              ((int16_t)(fifo_raw[1] & 0x0F) * 256U)) * 16U;
+        data->xl[0].raw[0] = (int16_t)((
+                                         (uint16_t)fifo_raw[0] |
+                                         ((uint16_t)(fifo_raw[1] & 0x0F) << 8)
+                                       ) << 4);
 
-        data->xl[0].raw[1] = ((int16_t)fifo_raw[1] / 16U +
-                              (int16_t)fifo_raw[2] * 16U) * 16U;
+        data->xl[0].raw[1] = (int16_t)((
+                                         ((uint16_t)fifo_raw[1] >> 4) |
+                                         ((uint16_t)fifo_raw[2] << 4)
+                                       ) << 4);
 
-        data->xl[0].raw[2] = ((int16_t)fifo_raw[3] +
-                              ((int16_t)(fifo_raw[4] & 0x0F) * 256U)) * 16U;
+        data->xl[0].raw[2] = (int16_t)((
+                                         (uint16_t)fifo_raw[3] |
+                                         ((uint16_t)(fifo_raw[4] & 0x0F) << 8)
+                                       ) << 4);
 
-        data->ah_bio.raw = ((int16_t)fifo_raw[4] / 16U +
-                            ((int16_t)fifo_raw[5] * 16U)) * 16U;
+        data->ah_bio.raw = (int16_t)(((
+                                        (uint16_t)fifo_raw[4] >> 4) |
+                                      ((uint16_t)fifo_raw[5] << 4)
+                                     ) << 4);
         data->ah_bio.mv = st1vafe3bx_from_lsb_to_mv(data->ah_bio.raw,
                                                     ((st1vafe3bx_priv_t *)(ctx->priv_data))->gain);
       }
@@ -2654,9 +2664,9 @@ int32_t st1vafe3bx_fifo_data_get(const stmdev_ctx_t *ctx,
          *
          *  16bit data (FEDC_BA98_7654_3210)
          */
-        data->xl[0].raw[0] = (int16_t)fifo_raw[0] + (int16_t)fifo_raw[1] * 256U;
-        data->xl[0].raw[1] = (int16_t)fifo_raw[2] + (int16_t)fifo_raw[3] * 256U;
-        data->xl[0].raw[2] = (int16_t)fifo_raw[4] + (int16_t)fifo_raw[5] * 256U;
+        data->xl[0].raw[0] = (int16_t)((uint16_t)fifo_raw[0] | ((uint16_t)fifo_raw[1] << 8));
+        data->xl[0].raw[1] = (int16_t)((uint16_t)fifo_raw[2] | ((uint16_t)fifo_raw[3] << 8));
+        data->xl[0].raw[2] = (int16_t)((uint16_t)fifo_raw[4] | ((uint16_t)fifo_raw[5] << 8));
       }
       break;
     default:
@@ -2963,7 +2973,7 @@ int32_t st1vafe3bx_ah_bio_active(const stmdev_ctx_t *ctx, uint8_t filter_on)
   st1vafe3bx_ctrl3_t ctrl3 = {0};
   int32_t ret = 0;
 
-  if (ctx->priv_data && ((st1vafe3bx_priv_t *)(ctx->priv_data))->vafe_only == 0)
+  if ((ctx->priv_data != NULL) && ((st1vafe3bx_priv_t *)(ctx->priv_data))->vafe_only == 0U)
   {
     return -1;
   }
