@@ -1157,7 +1157,7 @@ int32_t st1vafe3bx_xl_data_get(const stmdev_ctx_t *ctx,
 int32_t st1vafe3bx_ah_bio_data_get(const stmdev_ctx_t *ctx,
                                    st1vafe3bx_ah_bio_data_t *data)
 {
-  uint8_t buff[3] = {0};
+  uint8_t buff[4] = {0}; /* to keep two extra bytes in non-vAFE-only case */
   int32_t ret = 0;
 
   if (ctx->priv_data == NULL)
@@ -1180,15 +1180,15 @@ int32_t st1vafe3bx_ah_bio_data_get(const stmdev_ctx_t *ctx,
   }
   else
   {
-    /* Read and discard also OUT_Z_H reg to clear drdy */
-    ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_OUT_AH_BIO_L - 1u, buff, 3);
+    /* Read (and discard) two extra bytes (i.e. OUT_X_L/OUT_X_H) to clear drdy */
+    ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_OUT_AH_BIO_L, buff, 4);
     if (ret != 0)
     {
       return ret;
     }
 
-    data->raw = (int16_t)buff[2];
-    data->raw = (data->raw * 256U) + (int16_t)buff[1];
+    data->raw = (int16_t)buff[1];
+    data->raw = (data->raw * 256U) + (int16_t)buff[0];
 
     data->mv = st1vafe3bx_from_lsb_to_mv(data->raw,
                                          ((st1vafe3bx_priv_t *)(ctx->priv_data))->gain);
