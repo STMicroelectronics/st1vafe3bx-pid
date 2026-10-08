@@ -30,7 +30,20 @@ This directory contains the ST1VAFE3BX component drivers.
 # Update history
 
 ::: {.collapse}
-<input type="checkbox" id="collapse-section11" checked aria-hidden="true">
+<input type="checkbox" id="collapse-section12" checked aria-hidden="true">
+<label for="collapse-section12" aria-hidden="true">V2.4.4 / 08-Oct-2026</label>
+<div>
+
+## Main changes
+
+- Fix ah_bio_data_get() API
+- Fix MISRA issues
+
+##
+
+</div>
+
+<input type="checkbox" id="collapse-section11" aria-hidden="true">
 <label for="collapse-section11" aria-hidden="true">V2.4.3 / 30-Mar-2026</label>
 <div>
 
