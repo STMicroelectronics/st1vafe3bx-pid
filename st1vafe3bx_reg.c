@@ -2413,6 +2413,10 @@ int32_t st1vafe3bx_fifo_mode_set(const stmdev_ctx_t *ctx,
 
     ret = st1vafe3bx_write_reg(ctx, ST1VAFE3BX_FIFO_CTRL,
                                (uint8_t *)&fifo_ctrl, 1);
+    if (ret != 0)
+    {
+      goto exit;
+    }
   }
   else
   {
@@ -2424,6 +2428,10 @@ int32_t st1vafe3bx_fifo_mode_set(const stmdev_ctx_t *ctx,
     }
 
     ret = st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
+    if (ret != 0)
+    {
+      goto exit;
+    }
   }
 
 exit:
