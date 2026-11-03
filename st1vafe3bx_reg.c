@@ -2309,70 +2309,132 @@ int32_t st1vafe3bx_fifo_mode_set(const stmdev_ctx_t *ctx,
   st1vafe3bx_ah_bio_cfg2_t ah_bio_cfg2 = {0};
   int32_t ret = 0;
 
-  ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
-  ret += st1vafe3bx_read_reg(ctx, ST1VAFE3BX_FIFO_CTRL,
-                             (uint8_t *)&fifo_ctrl, 1);
-  ret += st1vafe3bx_read_reg(ctx, ST1VAFE3BX_FIFO_BATCH_DEC,
-                             (uint8_t *)&fifo_batch, 1);
-  ret += st1vafe3bx_read_reg(ctx, ST1VAFE3BX_FIFO_WTM, (uint8_t *)&fifo_wtm, 1);
-  ret += st1vafe3bx_read_reg(ctx, ST1VAFE3BX_AH_BIO_CFG2,
-                             (uint8_t *)&ah_bio_cfg2, 1);
-
-  if (ret == 0)
+  ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_CTRL4,
+                           (uint8_t *)&ctrl4, 1);
+  if (ret != 0)
   {
-    /* set FIFO mode */
-    if (val.operation != ST1VAFE3BX_FIFO_OFF)
-    {
-      ctrl4.fifo_en = 1;
-      fifo_ctrl.fifo_mode = ((uint8_t)val.operation & 0x7U);
+    goto exit;
+  }
 
-      /*
-       * fifo_en_adv must be set to 1 when the embedded function results and/or
-       * the AH / vAFE data at 3200 Hz ODR are intended to be stored in FIFO.
-       * It can be set to 0 in the other cases
-       */
-      if (ah_bio_cfg2.ah_bio_en == 0x1U)
-      {
-        fifo_ctrl.fifo_en_adv = 0x1U;
-      }
-      else
-      {
-        fifo_ctrl.fifo_en_adv = 0x0U;
-      }
+  ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_FIFO_CTRL,
+                           (uint8_t *)&fifo_ctrl, 1);
+  if (ret != 0)
+  {
+    goto exit;
+  }
+
+  ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_FIFO_BATCH_DEC,
+                           (uint8_t *)&fifo_batch, 1);
+  if (ret != 0)
+  {
+    goto exit;
+  }
+
+  ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_FIFO_WTM,
+                           (uint8_t *)&fifo_wtm, 1);
+  if (ret != 0)
+  {
+    goto exit;
+  }
+
+  ret = st1vafe3bx_read_reg(ctx, ST1VAFE3BX_AH_BIO_CFG2,
+                           (uint8_t *)&ah_bio_cfg2, 1);
+  if (ret != 0)
+  {
+    goto exit;
+  }
+
+  /* set FIFO mode */
+  if (val.operation != ST1VAFE3BX_FIFO_OFF)
+  {
+    ctrl4.fifo_en = 1;
+    fifo_ctrl.fifo_mode = ((uint8_t)val.operation & 0x7U);
+
+    /*
+     * fifo_en_adv must be set to 1 when the embedded function results and/or
+     * the AH / vAFE data at 3200 Hz ODR are intended to be stored in FIFO.
+     * It can be set to 0 in the other cases
+     */
+    if (ah_bio_cfg2.ah_bio_en == 0x1U)
+    {
+      fifo_ctrl.fifo_en_adv = 0x1U;
     }
     else
     {
-      ctrl4.fifo_en = 0;
+      fifo_ctrl.fifo_en_adv = 0x0U;
     }
-
-    /* set fifo depth (1X/2X) */
-    fifo_ctrl.fifo_depth = (uint8_t)val.store;
-
-    /* set xl_only_fifo */
-    fifo_wtm.xl_only_fifo = val.xl_only;
-
-    /* set batching info */
-    fifo_batch.dec_ts_batch = (uint8_t)val.batch.dec_ts;
-    fifo_batch.bdr_xl = (uint8_t)val.batch.bdr_xl;
-
-    fifo_ctrl.cfg_chg_en = val.cfg_change_in_fifo;
-
-    /* set watermark */
-    if (val.watermark > 0U)
-    {
-      fifo_ctrl.stop_on_fth = 1;
-      fifo_wtm.fth = val.watermark;
-    }
-
-    ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_FIFO_BATCH_DEC,
-                                (uint8_t *)&fifo_batch, 1);
-    ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_FIFO_WTM,
-                                (uint8_t *)&fifo_wtm, 1);
-    ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_FIFO_CTRL,
-                                (uint8_t *)&fifo_ctrl, 1);
-    ret += st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
+  }
+  else
+  {
+    ctrl4.fifo_en = 0;
   }
 
+  /* set fifo depth (1X/2X) */
+  fifo_ctrl.fifo_depth = (uint8_t)val.store;
+
+  /* set xl_only_fifo */
+  fifo_wtm.xl_only_fifo = val.xl_only;
+
+  /* set batching info */
+  fifo_batch.dec_ts_batch = (uint8_t)val.batch.dec_ts;
+  fifo_batch.bdr_xl = (uint8_t)val.batch.bdr_xl;
+
+  fifo_ctrl.cfg_chg_en = val.cfg_change_in_fifo;
+
+  /* set watermark */
+  if (val.watermark > 0U)
+  {
+    fifo_ctrl.stop_on_fth = 1;
+    fifo_wtm.fth = val.watermark;
+  }
+
+  ret = st1vafe3bx_write_reg(ctx, ST1VAFE3BX_FIFO_BATCH_DEC,
+                             (uint8_t *)&fifo_batch, 1);
+  if (ret != 0)
+  {
+    goto exit;
+  }
+
+  ret = st1vafe3bx_write_reg(ctx, ST1VAFE3BX_FIFO_WTM,
+                             (uint8_t *)&fifo_wtm, 1);
+  if (ret != 0)
+  {
+    goto exit;
+  }
+
+  if (val.operation != ST1VAFE3BX_FIFO_OFF)
+  {
+    /* FIFO_EN must be set before writing FIFO_MODE. */
+    ret = st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
+    if (ret != 0)
+    {
+      goto exit;
+    }
+
+    ret = st1vafe3bx_write_reg(ctx, ST1VAFE3BX_FIFO_CTRL,
+                               (uint8_t *)&fifo_ctrl, 1);
+    if (ret != 0)
+    {
+      goto exit;
+    }
+  }
+  else
+  {
+    ret = st1vafe3bx_write_reg(ctx, ST1VAFE3BX_FIFO_CTRL,
+                               (uint8_t *)&fifo_ctrl, 1);
+    if (ret != 0)
+    {
+      goto exit;
+    }
+
+    ret = st1vafe3bx_write_reg(ctx, ST1VAFE3BX_CTRL4, (uint8_t *)&ctrl4, 1);
+    if (ret != 0)
+    {
+      goto exit;
+    }
+  }
+
+exit:
   return ret;
 }
 
